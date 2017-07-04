@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html ng-app="app">
+<head>
+  <title>LD Studios Rails Interview</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css" media="screen" rel="stylesheet" type="text/css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" media="screen" rel="stylesheet" type="text/css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.1/jquery.min.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0/angular.min.js" type="text/javascript"></script>
+</head>
+<body ng-cloak>
+
+<article class="container tacos" ng-controller="TacosCtrl as tc">
+  <h1>LD Taco Shop</h1>
+  <div class="alert alert-danger" ng-if="tc.listError"><strong>Error getting tacos:</strong> {{tc.listError}}</div>
+  <div class="alert alert-danger" ng-if="tc.createError"><strong>Error ordering taco:</strong> {{tc.createError}}</div>
+  <div class="alert alert-danger" ng-if="tc.deleteError"><strong>Error deleting taco:</strong> {{tc.deleteError}}</div>
+
+  <h3>Order a new Taco</h3>
+
+  <form name="form" novalidate role="form" ng-submit="form.$valid && tc.createTaco()">
+    <fieldset ng-disabled="tc.creatingTaco">
+      <label>Meat</label>
+      <div class="form-group">
+        <label class="radio-inline">
+          <input type="radio" name="meat" value="chicken" ng-model="tc.newTaco.meat"> Chicken
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="meat" value="steak" ng-model="tc.newTaco.meat"> Steak
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="meat" value="pork" ng-model="tc.newTaco.meat"> Pork
+        </label>
+      </div>
+
+      <label>Sides</label>
+      <div class="form-group">
+        <label class="checkbox-inline">
+          <input type="checkbox" ng-model="tc.newTaco.rice"> Rice
+        </label>
+        <label class="checkbox-inline">
+          <input type="checkbox" ng-model="tc.newTaco.salsa"> Salsa
+        </label>
+        <label class="checkbox-inline">
+          <input type="checkbox" ng-model="tc.newTaco.fries"> Fries
+        </label>
+      </div>
+
+      <label>Notes</label>
+      <div class="form-group">
+        <textarea class="form-control" rows="3" ng-model="tc.newTaco.notes"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary">{{tc.creatingTaco ? 'Ordering Taco...' : 'Order Taco'}}</button>
+    </fieldset>
+  </form>
+
+  <h3>Taco Queue</h3>
+
+  <p ng-if="!tc.tacos.length">Empty! Order some tacos!</p>
+
+  <table class="table table-striped tacos" ng-if="tc.tacos.length">
+    <thead>
+    <tr>
+      <th>Order #</th>
+      <th>Meat</th>
+      <th>Rice</th>
+      <th>Salsa</th>
+      <th>Fries</th>
+      <th>Notes</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="taco in tc.tacos track by taco.id">
+      <td>{{taco.id}}</td>
+      <td class="meat">{{taco.meat}}</td>
+      <td class="rice">{{taco.rice ? 'yes' : 'no'}}</td>
+      <td class="salsa">{{taco.salsa ? 'yes' : 'no'}}</td>
+      <td class="fries">{{taco.fries ? 'yes' : 'no'}}</td>
+      <td>{{taco.notes}}</td>
+      <td><button type="button" class="btn btn-danger btn-xs fa fa-times" title="Delete this Taco" ng-click="tc.deleteTaco(taco)"></button></td>
+    </tr>
+    </tbody>
+  </table>
+</article>
+
+<style>
+  article.tacos form {
+    background: #eee;
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  table.tacos td.meat,
+  table.tacos td.rice,
+  table.tacos td.salsa,
+  table.tacos td.fries {
+    text-transform: capitalize;
+  }
+</style>
+
+<script>
+    var app = window.app = angular.module('app', []);
+
+    app.service('TacoService', function($http) {
+        function fromJSON(json) {
+            var taco = _.omit(json, '_id');
+            taco.id = json.id || json._id;
+            return taco;
+        }
+
+        this.getTacos = function() {
+            return $http.get('/tacos').then(function(result) {
+                return _.map(result.data, fromJSON);
+            });
+        };
+
+        this.createTaco = function(json) {
+            return $http({
+                method: 'POST',
+                url: '/tacos',
+                data: json
+            }).then(function(result) {
+                return fromJSON(result.data);
+            });
+        };
+
+        this.deleteTaco = function(id) {
+            return $http({
+                method: 'DELETE',
+                url: '/tacos/' + id
+            });
+        };
+    });
+
+    app.controller('TacosCtrl', function(TacoService) {
+        var tc = this;
+
+        // Load the list of tacos we already have
+        TacoService.getTacos().then(function(tacos) {
+            tc.tacos = tacos;
+        }).catch(function(err) {
+            tc.listError = err.message || err.statusText;
+        });
+
+        // Create a default taco for new tacos
+        var defaultTaco = {
+            meat: 'chicken',
+            rice: false,
+            salsa: false,
+            fries: false,
+            notes: ''
+        };
+        tc.newTaco = _.clone(defaultTaco);
+
+        tc.createTaco = function() {
+            tc.createError = null;
+            tc.creatingTaco = true;
+            TacoService.createTaco(tc.newTaco).then(function(taco) {
+                tc.tacos.push(taco);
+                tc.newTaco = _.clone(defaultTaco);
+            }).catch(function(err) {
+                tc.createError = err.message || err.statusText;
+            }).finally(function() {
+                tc.creatingTaco = false;
+            })
+        };
+
+        tc.deleteTaco = function(taco) {
+            tc.deleteError = null;
+            TacoService.deleteTaco(taco.id).then(function() {
+                var index = _.indexOf(tc.tacos, taco);
+                tc.tacos.splice(index, 1);
+            }).catch(function(err) {
+                tc.deleteError = err.message || err.statusText;
+            });
+        };
+    });
+</script>
+
+
+</body>
+</html>

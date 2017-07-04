@@ -1,19 +1,12 @@
 class TacosController < APIController
-  before_action :set_taco, only: [:show, :update, :destroy]
+  before_action :set_taco, only: [:show, :destroy]
 
   # GET /tacos
-  # GET /tacos.json
   def index
     @tacos = Taco.all
   end
 
-  # GET /tacos/1
-  # GET /tacos/1.json
-  def show
-  end
-
   # POST /tacos
-  # POST /tacos.json
   def create
     @taco = Taco.new(taco_params)
 
@@ -25,7 +18,6 @@ class TacosController < APIController
   end
 
   # DELETE /tacos/1
-  # DELETE /tacos/1.json
   def destroy
     @taco.destroy
   end

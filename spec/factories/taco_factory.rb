@@ -26,5 +26,8 @@ FactoryGirl.define do
       salsa true
       fries true
     end
+    rice false
+    salsa false
+    fries false
   end
 end
