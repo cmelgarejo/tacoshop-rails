@@ -38,5 +38,5 @@
  ~$ heroku open
  ```
  
- And open [https://<your-taco-app>.herokuapp.com](https://<your-taco-app>.herokuapp.com)
+ And open [https://your-taco-app.herokuapp.com](https://your-taco-app.herokuapp.com)
  
