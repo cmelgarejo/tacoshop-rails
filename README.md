@@ -10,19 +10,20 @@
  ## Deployment
  
  ### TL;DR
- ```
- ~$ rails db:create
- ~$ rails db:migrate
- ~$ rails db:migrate RAILS_ENV=test
- ~$ rails db:seed
- ~$ rails s
+ 
+ ```sh
+ $ rails db:create
+ $ rails db:migrate
+ $ rails db:migrate RAILS_ENV=test
+ $ rails db:seed
+ $ rails s
  ```
  
  ## Run tests
  
  ```
- ~$ rails test
- ~$ bundle exec rspec
+ $ rails test
+ $ bundle exec rspec
  ```
  
  ### Deploying to Heroku
@@ -30,12 +31,12 @@
  from the project root run:
  
  ```
- ~$ heroku login #Enter your credentials and...
- ~$ heroku create
- ~$ git push heroku master
- ~$ heroku run rake db:migrate
- ~$ heroku run rake db:seed
- ~$ heroku open
+ $ heroku login #Enter your credentials and...
+ $ heroku create
+ $ git push heroku master
+ $ heroku run rake db:migrate
+ $ heroku run rake db:seed
+ $ heroku open
  ```
  
  And open [https://your-taco-app.herokuapp.com](https://your-taco-app.herokuapp.com)
